@@ -1,0 +1,5 @@
+# Windows + carte NVIDIA, pour le développement uniquement : l'application compilée télécharge
+# ces composants à la demande (bouton « Activer le GPU NVIDIA »).
+nvidia-cublas-cu12==12.9.2.10
+nvidia-cudnn-cu12==9.26.0.51
+nvidia-cuda-nvrtc-cu12==12.9.86

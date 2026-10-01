@@ -1,0 +1,165 @@
+/* Style de la page mise en forme : utilisé pour l'aperçu ET pour l'export PDF. */
+
+@page { size: A4; margin: 16mm 17mm 18mm; }
+
+.page {
+  --accent: #6d4aff;
+  --accent-doux: #efeaff;
+  --titre: #17152b;
+  --texte: #2b2d3a;
+  --discret: #6b6f82;
+  --def: #5b6cff;      --def-fond: #eef0ff;
+  --ex: #1f9d6b;       --ex-fond: #e8f7f0;
+  --ret: #d98a00;      --ret-fond: #fff5e0;
+  --att: #e0474c;      --att-fond: #fdecec;
+  --police: "Segoe UI Variable Text", "Segoe UI", -apple-system, system-ui, sans-serif;
+  --police-titres: "Segoe UI Variable Display", "Segoe UI", -apple-system, system-ui, sans-serif;
+
+  counter-reset: section;
+  font-family: var(--police);
+  font-size: 11pt;
+  line-height: 1.6;
+  color: var(--texte);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.page h1 {
+  font-family: var(--police-titres);
+  font-size: 25pt;
+  line-height: 1.15;
+  font-weight: 700;
+  color: var(--titre);
+  margin: 0 0 6mm;
+  padding-bottom: 4mm;
+  border-bottom: 3px solid var(--accent);
+  letter-spacing: -0.01em;
+}
+
+.page h2 {
+  counter-increment: section;
+  font-family: var(--police-titres);
+  font-size: 15.5pt;
+  font-weight: 650;
+  color: var(--titre);
+  margin: 8mm 0 3mm;
+  break-after: avoid;
+}
+.page h2::before {
+  content: counter(section);
+  display: inline-grid;
+  place-items: center;
+  width: 1.55em;
+  height: 1.55em;
+  margin-right: 0.5em;
+  border-radius: 0.45em;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.8em;
+  vertical-align: 0.1em;
+}
+
+.page h3 {
+  font-size: 12.5pt;
+  font-weight: 650;
+  color: var(--accent);
+  margin: 5mm 0 2mm;
+  break-after: avoid;
+}
+
+.page p { margin: 0 0 2.6mm; }
+.page strong { color: var(--titre); font-weight: 650; }
+.page ul, .page ol { margin: 0 0 3mm; padding-left: 6mm; }
+.page li { margin: 0.8mm 0; }
+.page li::marker { color: var(--accent); }
+.page hr { border: 0; border-top: 1px solid #e3e4ec; margin: 6mm 0; }
+.page table { border-collapse: collapse; width: 100%; margin: 3mm 0 4mm; font-size: 10pt; }
+.page th, .page td { border: 1px solid #e0e2ea; padding: 2mm 3mm; text-align: left; }
+.page th { background: var(--accent-doux); color: var(--titre); }
+
+.page blockquote {
+  margin: 3mm 0 4mm;
+  padding: 3mm 4.5mm;
+  border-left: 4px solid var(--accent);
+  border-radius: 0 3mm 3mm 0;
+  background: var(--accent-doux);
+  break-inside: avoid;
+}
+.page blockquote p:last-child { margin-bottom: 0; }
+.page blockquote.definition { border-color: var(--def); background: var(--def-fond); }
+.page blockquote.exemple    { border-color: var(--ex);  background: var(--ex-fond); }
+.page blockquote.retenir    { border-color: var(--ret); background: var(--ret-fond); }
+.page blockquote.attention  { border-color: var(--att); background: var(--att-fond); }
+.page blockquote.definition strong:first-child { color: var(--def); }
+.page blockquote.exemple strong:first-child    { color: var(--ex); }
+.page blockquote.retenir strong:first-child    { color: var(--ret); }
+.page blockquote.attention strong:first-child  { color: var(--att); }
+
+/* ---------- Thème Classique : sérif, sobre, bleu marine ---------- */
+.page.theme-classique {
+  --accent: #1f3a60;
+  --accent-doux: #eef2f7;
+  --titre: #14223a;
+  --texte: #25272e;
+  --police: Cambria, Georgia, "Times New Roman", serif;
+  --police-titres: Cambria, Georgia, serif;
+  font-size: 11.5pt;
+}
+.theme-classique h1 {
+  text-align: center;
+  font-weight: 700;
+  font-variant: small-caps;
+  letter-spacing: 0.02em;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.theme-classique h1::after {
+  content: "";
+  display: block;
+  width: 28mm;
+  height: 0;
+  margin: 4mm auto 0;
+  border-top: 1.5px solid var(--accent);
+}
+.theme-classique h2 {
+  border-bottom: 1px solid #c9d2df;
+  padding-bottom: 1.5mm;
+}
+.theme-classique h2::before {
+  content: counter(section, upper-roman) ".";
+  display: inline;
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--accent);
+  font-size: 1em;
+  margin-right: 0.4em;
+}
+.theme-classique h3 { font-style: italic; }
+.theme-classique blockquote { border-radius: 0; border-left-width: 3px; }
+
+/* ---------- Thème Pastel : doux et coloré ---------- */
+.page.theme-pastel {
+  --accent: #e2629b;
+  --accent-doux: #fdeef5;
+  --titre: #3a2340;
+  --def: #7a6cf0;   --def-fond: #f1efff;
+  --ex: #2ba98a;    --ex-fond: #e6f8f2;
+  --ret: #e39a2d;   --ret-fond: #fff4e2;
+  --att: #e5566b;   --att-fond: #ffeef0;
+}
+.theme-pastel h1 {
+  border-bottom: 0;
+  padding: 6mm 7mm;
+  border-radius: 5mm;
+  background: linear-gradient(120deg, #ffe3ef, #e9e4ff 55%, #dff4ff);
+}
+.theme-pastel h2 {
+  display: inline-block;
+  padding: 1.6mm 5mm 1.6mm 2mm;
+  border-radius: 99px;
+  background: var(--accent-doux);
+}
+.theme-pastel h2::before { border-radius: 50%; }
+.theme-pastel blockquote { border-left: 0; border-radius: 3.5mm; }

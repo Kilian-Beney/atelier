@@ -1,0 +1,29 @@
+# Dépendances communes Windows / macOS (Python 3.11)
+# Interface (fenêtre native : WebView2 sous Windows, WebKit sous macOS)
+pywebview==6.2.1
+# Mise en page
+Markdown==3.11
+# Détourage
+rembg==2.0.84
+onnxruntime==1.30.0
+PyMatting==1.1.16
+pymupdf==1.28.2
+pillow==12.3.0
+pillow_heif==1.7.0
+scipy==1.17.1
+# Transcription + identification des personnes
+faster-whisper==1.2.1
+ctranslate2==4.8.2
+sherpa-onnx==1.13.8
+scikit-learn==1.9.1
+# Dictaphone et réécoute
+sounddevice==0.5.6
+numpy==2.4.6
+# Mac à puce Apple : Whisper sur la puce graphique (MLX / Metal).
+# mlx-whisper lui-même s'installe à part, sans ses dépendances (PyTorch inutile ici) :
+#   pip install --no-deps mlx-whisper==0.4.3
+mlx==0.32.3 ; sys_platform == "darwin" and platform_machine == "arm64"
+tiktoken==0.14.0 ; sys_platform == "darwin" and platform_machine == "arm64"
+more-itertools ; sys_platform == "darwin" and platform_machine == "arm64"
+# Compilation
+pyinstaller==6.22.3

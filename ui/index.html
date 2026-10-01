@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Atelier</title>
+<link rel="stylesheet" href="page.css">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<nav class="rail">
+  <img class="logo" src="icone.png" alt="">
+  <button class="onglet actif" data-outil="transcription" title="Transcription et dictaphone (Ctrl+1)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></svg>
+    Transcription<i class="point" id="point-rec" hidden></i>
+  </button>
+  <button class="onglet" data-outil="mise-en-page" title="Mise en page (Ctrl+2)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>
+    Mise en page
+  </button>
+  <button class="onglet" data-outil="detourage" title="Détourage (Ctrl+3)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/></svg>
+    Détourage
+  </button>
+  <div class="bas">100 %<br>local</div>
+</nav>
+
+<!-- ======================= TRANSCRIPTION ======================= -->
+<section class="vue" id="vue-transcription">
+  <header>
+    <div style="margin-right:auto">
+      <h1>Transcription</h1>
+      <p>Audio → texte, avec identification des voix · rien ne quitte ton PC</p>
+    </div>
+    <button class="secondaire fort" id="tr-gpu-installer" hidden title="Ta carte NVIDIA peut transcrire 5 à 10 fois plus vite : télécharge une fois les composants CUDA (1,4 Go)">⚡ Activer le GPU NVIDIA</button>
+    <div class="badge" id="tr-badge" style="margin-left:0"><i></i><span>Détection du matériel…</span></div>
+  </header>
+  <main>
+    <section class="panneau">
+      <div style="padding:16px 16px 0">
+        <div class="segmente gros" id="tr-onglets">
+          <button data-onglet="fichiers" class="actif">📁  Fichiers</button>
+          <button data-onglet="dictaphone">🎙  Dictaphone</button>
+        </div>
+      </div>
+      <div class="defile">
+        <!-- Fichiers -->
+        <div id="tr-fichiers">
+          <div class="depot" id="tr-depot">
+            <div class="fleche">⬇</div>
+            <b>Glisse tes fichiers audio ici</b>
+            <span>ou clique pour parcourir · wav, mp3, m4a, flac…</span>
+          </div>
+          <div class="liste" id="tr-liste"><div class="vide">Aucun fichier pour l'instant</div></div>
+          <div class="rangee" style="margin-top:8px">
+            <button class="secondaire" id="tr-ajout-dossier">+ Ajouter un dossier</button>
+            <button class="secondaire" id="tr-vider">Vider la liste</button>
+          </div>
+        </div>
+
+        <!-- Dictaphone -->
+        <div id="tr-dictaphone" hidden>
+          <label class="champ">MICRO</label>
+          <div class="chemin">
+            <select id="dic-micro"></select>
+            <button id="dic-actualiser" title="Actualiser la liste des micros">⟳</button>
+          </div>
+
+          <div class="moniteur" style="margin-top:10px">
+            <canvas id="dic-onde"></canvas>
+            <div class="vumetre"><div class="masque" id="dic-masque" style="width:100%"></div><div class="crete" id="dic-crete" style="left:0"></div></div>
+            <div class="echelle"><span>-60</span><span>-45</span><span>-30</span><span>-15</span><span>0 dB</span></div>
+            <div class="etat-micro"><span id="dic-etat-micro">Micro coupé</span><span id="dic-info"></span></div>
+          </div>
+
+          <div class="chrono" id="dic-chrono">00:00:00</div>
+          <div class="chrono-etat" id="dic-etat">Prêt à enregistrer</div>
+          <div class="commandes">
+            <button class="rond" id="dic-tester" title="Tester le micro sans enregistrer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M2 12h3l3-8 4 16 3-10 2 4h5"/></svg>
+            </button>
+            <button class="rond rec" id="dic-rec" title="Enregistrer / Arrêter (Ctrl+R)"><span></span></button>
+            <button class="rond" id="dic-pause" title="Pause" disabled>
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+            </button>
+          </div>
+          <div class="dernier" id="dic-dernier" hidden>
+            <span id="dic-dernier-nom"></span>
+            <button class="lien" id="dic-dernier-transcrire">Transcrire</button>
+            <button class="lien" id="dic-dernier-dossier">Dossier</button>
+          </div>
+
+          <div class="titre-section">SITUATION</div>
+          <div class="profils" id="dic-profils">
+            <button data-profil="proche">Note vocale<small>Micro près de la bouche</small></button>
+            <button data-profil="entretien">Entretien<small>2-3 personnes, table</small></button>
+            <button data-profil="reunion">Réunion<small>Voix proches et lointaines</small></button>
+            <button data-profil="amphi">Cours / amphi<small>Orateur éloigné, salle bruyante</small></button>
+          </div>
+
+          <div class="titre-section">SON DU MICRO <button class="lien" id="dic-reinit">Réinitialiser</button></div>
+          <div class="curseur-ligne">
+            <span class="nom">Sensibilité du micro</span><span class="valeur" id="dic-sens-val">+0 dB</span>
+            <input type="range" id="dic-sens" min="0" max="30" step="1" value="0">
+          </div>
+          <label class="bascule"><input type="checkbox" id="dic-agc"><span class="rail-b"></span>
+            <span class="txt">Gain automatique<small>Remonte les voix faibles ou lointaines, contient les fortes</small></span></label>
+          <label class="bascule"><input type="checkbox" id="dic-bruit"><span class="rail-b"></span>
+            <span class="txt">Réduction du bruit<small>Souffle, ventilation, bourdonnement de fond</small></span></label>
+          <div class="curseur-ligne" id="dic-force-ligne">
+            <span class="nom">Force de la réduction</span><span class="valeur" id="dic-force-val">Moyenne</span>
+            <input type="range" id="dic-force" min="0" max="100" step="5" value="60">
+          </div>
+          <label class="bascule"><input type="checkbox" id="dic-coupe-bas"><span class="rail-b"></span>
+            <span class="txt">Filtre anti-grondement<small>Coupe les chocs sur la table, le vent, les vibrations</small></span></label>
+
+          <div class="titre-section">ENREGISTREMENT</div>
+          <div class="chemin">
+            <input type="text" id="dic-dossier" readonly>
+            <button id="dic-changer" title="Changer de dossier">…</button>
+            <button id="dic-ouvrir" title="Ouvrir le dossier">📂</button>
+          </div>
+          <div class="deux" style="margin-top:8px">
+            <select id="dic-format">
+              <option value="wav">WAV (qualité max)</option>
+              <option value="flac">FLAC (sans perte)</option>
+              <option value="m4a">M4A (léger)</option>
+            </select>
+            <label class="bascule" style="padding:0"><input type="checkbox" id="dic-auto"><span class="rail-b"></span>
+              <span class="txt" style="font-size:12.5px">Transcrire à l'arrêt</span></label>
+          </div>
+        </div>
+
+        <div class="titre-section">QUALITÉ DE TRANSCRIPTION</div>
+        <div class="segmente" id="tr-qualite">
+          <button data-v="Rapide">Rapide</button>
+          <button data-v="Équilibré" class="actif">Équilibré</button>
+          <button data-v="Précis">Précis</button>
+        </div>
+        <div class="aide" id="tr-info-modele"></div>
+        <div class="deux" style="margin-top:10px">
+          <div><label class="champ">LANGUE</label>
+            <select id="tr-langue">
+              <option>Français</option><option>Anglais</option><option>Espagnol</option><option>Allemand</option>
+              <option>Italien</option><option>Portugais</option><option>Arabe</option><option>Détection auto</option>
+            </select></div>
+          <div><label class="champ">VOIX / PERSONNES</label>
+            <select id="tr-personnes">
+              <option value="1">Une seule</option><option value="2">2 personnes</option><option value="3">3 personnes</option>
+              <option value="4">4 personnes</option><option value="5">5 personnes</option><option value="6">6 personnes</option>
+              <option value="0">Automatique</option>
+            </select></div>
+        </div>
+        <div class="aide" id="tr-aide-personnes"></div>
+        <label class="bascule" style="margin-top:4px"><input type="checkbox" id="tr-ameliorer"><span class="rail-b"></span>
+          <span class="txt">Améliorer les voix<small>Voix faibles remontées et bruit atténué avant la transcription</small></span></label>
+      </div>
+      <div class="pied-panneau">
+        <button class="principal" id="tr-lancer">Lancer la transcription</button>
+      </div>
+    </section>
+
+    <section class="panneau">
+      <div class="barre">
+        <div class="titre-section">TRANSCRIPTION</div>
+        <span class="indice"></span>
+        <button class="secondaire" id="tr-copier" disabled>Copier le texte</button>
+        <button class="secondaire" id="tr-gdocs" disabled title="Copier le texte mis en forme et ouvrir un nouveau Google Docs">Google Docs</button>
+        <button class="secondaire" id="tr-vers-mep" disabled title="Envoyer le texte dans Mise en page">→ Mise en page</button>
+        <button class="secondaire" id="tr-dossier" disabled>Ouvrir le dossier</button>
+      </div>
+      <div class="noms" id="tr-noms" hidden>
+        <div class="tete">
+          <div class="titre-section">NOMS DES PERSONNES</div>
+          <small>Mis à jour partout : texte, .txt et .srt</small>
+          <select id="tr-noms-fichier" hidden></select>
+          <button class="secondaire fort" id="tr-appliquer-noms">Appliquer les noms</button>
+        </div>
+        <div class="champs" id="tr-champs-noms"></div>
+      </div>
+      <div class="texte" id="tr-texte"><span class="placeholder">Le texte apparaîtra ici au fur et à mesure de la transcription…</span></div>
+      <div class="lecteur">
+        <button id="lec-lecture" title="Lecture / pause (Ctrl+Espace)">▶</button>
+        <button id="lec-moins">−5 s</button>
+        <button id="lec-plus">+5 s</button>
+        <span class="temps" id="lec-temps">--:--:-- / --:--:--</span>
+        <span class="nom" id="lec-nom">Aucun audio chargé</span>
+        <small id="lec-aide"></small>
+      </div>
+      <div class="pied">
+        <div class="statut" id="tr-statut"><span>Prêt. Ajoute des fichiers audio ou enregistre avec le dictaphone.</span><b></b></div>
+        <div class="progression" id="tr-progression"><div></div></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- ======================= MISE EN PAGE ======================= -->
+<section class="vue" id="vue-mise-en-page" hidden>
+  <header>
+    <div>
+      <h1>Mise en page</h1>
+      <p>Tes notes en vrac → une belle page · IA 100 % locale</p>
+    </div>
+    <div class="badge" id="mep-badge"><i></i><span>IA non démarrée</span></div>
+  </header>
+  <main>
+    <section class="panneau pad">
+      <div class="titre-section">TES NOTES <button class="lien" id="mep-ouvrir">Ouvrir un fichier .txt</button></div>
+      <textarea class="notes" id="mep-notes" placeholder="Colle ici tes notes de cours, même en vrac et pleines de fautes…&#10;&#10;Astuce : dans Transcription, le bouton « → Mise en page » envoie directement le texte ici."></textarea>
+      <div class="aide" id="mep-compteur"></div>
+      <div class="titre-section">STYLE</div>
+      <div class="segmente" id="mep-modes">
+        <button data-mode="fidele" class="actif">Tout garder</button>
+        <button data-mode="fiche">Fiche de révision</button>
+      </div>
+      <div class="aide" id="mep-aide-mode"></div>
+      <div class="titre-section">THÈME</div>
+      <div class="themes" id="mep-themes">
+        <button class="theme actif" data-theme="moderne"><div class="miniature m-moderne"><b></b><s></s><s></s></div>Moderne</button>
+        <button class="theme" data-theme="classique"><div class="miniature m-classique"><b></b><s></s><s></s></div>Classique</button>
+        <button class="theme" data-theme="pastel"><div class="miniature m-pastel"><b></b><s></s><s></s></div>Pastel</button>
+      </div>
+      <button class="principal" id="mep-lancer" style="margin-top:18px" disabled>✨ Mettre en page</button>
+    </section>
+    <section class="panneau">
+      <div class="barre">
+        <div class="titre-section">APERÇU</div>
+        <span class="indice" id="mep-indice"></span>
+        <button class="secondaire" id="mep-copier" disabled>Copier</button>
+        <button class="secondaire" id="mep-gdocs" disabled title="Copier la page mise en forme et ouvrir un nouveau Google Docs">Google Docs</button>
+        <button class="secondaire fort" id="mep-pdf" disabled>Exporter en PDF</button>
+      </div>
+      <div class="apercu" id="mep-apercu">
+        <article class="page theme-moderne" id="mep-page">
+          <div class="page-vide"><div>
+            <div class="grand">📄</div>
+            <p><b>Ta page apparaîtra ici.</b></p>
+            <p>Colle tes notes à gauche, choisis un thème, puis clique sur « Mettre en page ».</p>
+          </div></div>
+        </article>
+      </div>
+      <div class="pied">
+        <div class="statut" id="mep-statut"><span>Prêt.</span><b></b></div>
+        <div class="progression" id="mep-progression"><div></div></div>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- ======================= DÉTOURAGE ======================= -->
+<section class="vue" id="vue-detourage" hidden>
+  <header>
+    <div>
+      <h1>Détourage</h1>
+      <p>Suppression de fond sans perte de qualité, par lot · images et PDF</p>
+    </div>
+  </header>
+  <main>
+    <section class="panneau">
+      <div class="defile">
+        <div class="depot" id="det-depot">
+          <div class="fleche">⬇</div>
+          <b>Glisse tes images, PDF ou dossiers ici</b>
+          <span>PNG · JPG · WEBP · TIFF · HEIC · AVIF · PDF</span>
+        </div>
+        <div class="liste" id="det-liste"><div class="vide">Aucune image pour l'instant</div></div>
+      </div>
+      <div class="pied-panneau">
+        <div class="rangee">
+          <button class="secondaire" id="det-ajout-dossier">+ Dossier</button>
+          <button class="secondaire" id="det-retirer">Retirer</button>
+          <button class="secondaire" id="det-vider">Tout vider</button>
+        </div>
+        <div class="compte" id="det-compte">0 image</div>
+      </div>
+    </section>
+    <section class="panneau">
+      <div class="barre">
+        <div class="titre-section">APERÇU</div>
+        <span class="indice" id="det-indice"></span>
+        <div class="segmente" id="det-modes" style="min-width:330px">
+          <button data-mode="ia" class="actif">Détourage IA</button>
+          <button data-mode="separer">Séparer les éléments</button>
+        </div>
+      </div>
+      <div class="apercus">
+        <div class="cadre"><span class="etiquette">ORIGINAL</span><img id="det-img-original" hidden alt=""><span class="rien" id="det-rien-original">Sélectionne une image</span></div>
+        <div class="cadre"><span class="etiquette" id="det-etiquette-resultat">RÉSULTAT</span><img id="det-img-resultat" hidden alt=""><span class="rien" id="det-rien-resultat">—</span></div>
+      </div>
+      <div class="options">
+        <div class="groupe" id="det-groupe-ia">
+          <div class="titre-section">DÉTOURAGE IA <small style="font-weight:400;letter-spacing:0">photos, objets, personnes</small></div>
+          <div class="form">
+            <span>Modèle</span><select id="det-modele"></select>
+            <span>Suffixe</span><input type="text" id="det-suffixe" value="_detoure">
+            <label class="bascule plein"><input type="checkbox" id="det-affiner"><span class="rail-b"></span><span class="txt">Affiner les bords (cheveux, fourrure) — plus lent</span></label>
+            <label class="bascule plein"><input type="checkbox" id="det-nettoyer"><span class="rail-b"></span><span class="txt">Nettoyer les petits résidus du masque</span></label>
+            <label class="bascule"><input type="checkbox" id="det-recadrer"><span class="rail-b"></span><span class="txt">Recadrer</span></label>
+            <div class="rangee"><input type="number" id="det-marge" min="0" max="2000" value="0" style="width:90px"><small style="color:var(--texte-doux)">px de marge</small></div>
+          </div>
+        </div>
+        <div class="groupe" id="det-groupe-sep" hidden>
+          <div class="titre-section">SÉPARATION <button class="lien" id="det-apercu-sep">Aperçu du découpage</button></div>
+          <div class="form">
+            <span title="Traits plus proches que cette distance = même élément">Regroupement (px)</span><input type="number" id="det-sp-distance" min="0" max="300" value="14">
+            <span title="Les éléments plus petits sont ignorés (poussières)">Taille minimum (px)</span><input type="number" id="det-sp-min" min="0" max="1000000" step="100" value="400">
+            <span title="Plus haut = capte les traits clairs ; plus bas = ignore ombres et grain">Sensibilité du trait</span><input type="number" id="det-sp-seuil" min="20" max="250" value="190">
+            <span title="Bande ignorée au bord de la page (ombres de scanner)">Marge ignorée (px)</span><input type="number" id="det-sp-bord" min="0" max="500" value="12">
+            <label class="bascule plein"><input type="checkbox" id="det-sp-remplir" checked><span class="rail-b"></span><span class="txt">Remplir l'intérieur des formes fermées</span></label>
+            <span title="Un intérieur fermé plus petit reste transparent">Intérieur minimum (px)</span><input type="number" id="det-sp-trou" min="0" max="1000000" step="500" value="2500">
+          </div>
+        </div>
+        <div class="groupe">
+          <div class="titre-section">SORTIE</div>
+          <div class="form">
+            <span>Format</span><select id="det-format"></select>
+            <span>Résolution PDF</span><div class="rangee"><input type="number" id="det-dpi" min="72" max="1200" step="50" value="300" style="width:90px"><small style="color:var(--texte-doux)">DPI</small></div>
+            <span>Dossier</span><div class="chemin"><input type="text" id="det-sortie" placeholder="« detoure » à côté du fichier" readonly><button id="det-choisir-sortie" style="height:32px">…</button></div>
+            <label class="bascule plein"><input type="checkbox" id="det-ecraser"><span class="rail-b"></span><span class="txt">Écraser si le fichier existe</span></label>
+          </div>
+        </div>
+      </div>
+      <div class="pied">
+        <div class="statut" id="det-statut"><span>Prêt.</span><b></b></div>
+        <div class="progression" id="det-progression"><div></div></div>
+      </div>
+      <div class="actions-det">
+        <button class="principal" id="det-lancer">Détourer</button>
+        <button class="secondaire" id="det-ouvrir" disabled>Ouvrir le dossier</button>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- Fenêtre de correction d'une réplique -->
+<div class="modale" id="editeur" hidden>
+  <div class="boite">
+    <div class="haut">
+      <span id="ed-qui-label" style="color:var(--texte-doux)">Qui parle :</span>
+      <select id="ed-qui"></select>
+      <span class="t" id="ed-temps"></span>
+      <button class="secondaire" id="ed-ecouter">▶  Écouter</button>
+    </div>
+    <textarea id="ed-texte"></textarea>
+    <div class="bas">
+      <small>Ctrl+Entrée pour enregistrer · Échap pour annuler</small>
+      <button class="secondaire" id="ed-annuler">Annuler</button>
+      <button class="secondaire fort" id="ed-enregistrer">Enregistrer</button>
+    </div>
+  </div>
+</div>
+<div id="toasts"></div>
+
+<script src="app.js"></script>
+<script src="transcription.js"></script>
+<script src="dictaphone.js"></script>
+<script src="mise_en_page.js"></script>
+<script src="detourage.js"></script>
+</body>
+</html>
